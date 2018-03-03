@@ -44,7 +44,7 @@ def run_ballot():
 
     logging.info('Next event RSVPS: %s', len(event_rsvps))
     member_ids = client.get_member_ids_from_rsvps(event_rsvps)
-    max_rsvps = int(get_environment_variable(MAX_RSVPS_VAR))
+    max_rsvps = min(len(member_ids), int(get_environment_variable(MAX_RSVPS_VAR)))
 
     logging.info('Get event hosts and coorganizers')
     coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(event_rsvps)
