@@ -6,6 +6,10 @@
 
 ## Usage Example
 
+```bash
+PYTHONPATH='.' python meetup_ballot/ballot.py
+```
+
 ## Meta
 
 ## Contributing
