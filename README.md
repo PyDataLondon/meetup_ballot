@@ -10,6 +10,14 @@
 PYTHONPATH='.' python meetup_ballot/ballot.py
 ```
 
+## Testing
+
+* Running Tests
+
+```bash
+$ python -m unittest discover tests
+```
+
 ## Meta
 
 ## Contributing
