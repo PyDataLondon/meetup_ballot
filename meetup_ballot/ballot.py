@@ -109,7 +109,10 @@ def main():
     if check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days=RSVP_BEFORE_DAYS):
         logging.info('The next meetup is less than %s days ago.', RSVP_BEFORE_DAYS)
         logging.info('Running the PyData London Meetup"s RSVP Ballot')
-        run_ballot(meetup_key, meetup_urlname)
+        try:
+            run_ballot(meetup_key, meetup_urlname)
+        except Exception as e:
+            logging.exception(e)
     else:
         logging.info('The next meetup is more than %s days ago.', RSVP_BEFORE_DAYS)
         logging.info('It"s not the right time to run the ballot.')
