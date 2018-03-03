@@ -39,7 +39,7 @@ class MeetupClient:
             if response.status_code != 201:
                 logging.info('Something went wrong! Response code: %s', response.status_code)
             else:
-                logging.info('Marked member_id: {}"s RSVP as Yes', member_id)
+                logging.info('Marked member_id: %s"s RSVP as Yes', member_id)
 
 
     def get_rsvps(self, event_id):
