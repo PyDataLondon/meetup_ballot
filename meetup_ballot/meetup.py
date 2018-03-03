@@ -102,6 +102,7 @@ class MeetupClient:
             member = rsvp['member']
             if member.get('role') or member['event_context']['host']:
                 member_ids.append(rsvp['member']['id'])
+        logging.info('Co-organizers IDs: %s', member_ids)
         return member_ids
 
     def get_member_ids_from_rsvps(self, rsvps):
