@@ -33,6 +33,7 @@ class MeetupClient:
     def get_member_ids_from_rsvps(self, rsvps):
         member_ids = []
         for rsvp in rsvps:
-            if rsvp['member']['type'] == 'member':
+            member = rsvp['member']
+            if not member.get('role') and not member['event_context']['host']:
                 member_ids.append(rsvp['member']['id'])
         return member_ids
