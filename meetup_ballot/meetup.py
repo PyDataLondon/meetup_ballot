@@ -46,7 +46,11 @@ class MeetupClient:
         :return:
         """
         response = self.send_get_request({'page': 1}, 'events')
-        return response.json()[0]['id']
+        if response.status_code == 200 and len(response.json()) > 0:
+            return response.json()[0]['id']
+        else:
+            logging.error('No future events scheduled')
+            return 0
 
     def get_next_event_time(self):
         """
@@ -54,7 +58,11 @@ class MeetupClient:
         :return: int
         """
         response = self.send_get_request({'page': 1}, 'events')
-        return response.json()[0]['time']
+        if response.status_code == 200 and len(response.json()) > 0:
+            return response.json()[0]['time']
+        else:
+            logging.error('No future events scheduled')
+            return float('INF')
 
     def mark_rsvps_to_yes(self, event_id, member_ids):
         """
