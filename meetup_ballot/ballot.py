@@ -19,8 +19,9 @@ def setup_logging():
     Setups logging for the ballot.
     :return: None
     """
+    logging_file = 'ballot.log'
     logging_format = '%(asctime)s %(levelname)9s %(lineno)4s %(module)s: %(message)s'
-    logging.basicConfig(level=logging.INFO, format=logging_format)
+    logging.basicConfig(level=logging.INFO, format=logging_format, filename=logging_file)
 
 
 def get_environment_variable(var):
@@ -60,7 +61,7 @@ def check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days):
     time_after_delta = today + timedelta(days=days)
     client = MeetupClient(key=meetup_key, urlname=meetup_urlname)
     next_event_time = client.get_next_event_time()/1000
-    return next_event_time < time_after_delta
+    return next_event_time < time_after_delta.timestamp()
 
 
 def run_ballot(meetup_key, meetup_urlname):

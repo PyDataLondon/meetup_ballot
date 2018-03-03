@@ -23,8 +23,9 @@ class MeetupClient:
         Setups the logging.
         :return: None
         """
+        logging_file = 'meetup.log'
         logging_format = '%(asctime)s %(levelname)9s %(lineno)4s %(module)s: %(message)s'
-        logging.basicConfig(level=logging.INFO, format=logging_format)
+        logging.basicConfig(level=logging.INFO, format=logging_format, filename=logging_file)
 
     def send_get_request(self, params, append_url):
         """
