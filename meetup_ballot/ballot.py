@@ -46,11 +46,15 @@ def run_ballot():
     member_ids = client.get_member_ids_from_rsvps(event_rsvps)
     max_rsvps = int(get_environment_variable(MAX_RSVPS_VAR))
 
+    logging.info('Get event hosts and coorganizers')
+    coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(event_rsvps)
+
     logging.info('Selecting random: %s members', max_rsvps)
     random_members = select_random(member_ids, max_rsvps)
 
     logging.info('Marking RSVPs to Yes for random members')
-    client.mark_rsvps_to_yes(next_event_id, random_members)
+    attending_members = coorg_hosts_member_ids.extend(random_members)
+    client.mark_rsvps_to_yes(next_event_id, attending_members)
 
 
 if __name__ == '__main__':

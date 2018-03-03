@@ -41,11 +41,18 @@ class MeetupClient:
             else:
                 logging.info('Marked member_id: %s"s RSVP as Yes', member_id)
 
-
     def get_rsvps(self, event_id):
         append_url = 'events/{event_id}/rsvps'.format(event_id=event_id)
         response = self.send_get_request({}, append_url=append_url)
         return response.json()
+
+    def get_coorganizers_and_hosts_from_rsvps(self, rsvps):
+        member_ids = []
+        for rsvp in rsvps:
+            member = rsvp['member']
+            if member.get('role') or member['event_context']['host']:
+                member_ids.append(rsvp['member']['id'])
+        return member_ids
 
     def get_member_ids_from_rsvps(self, rsvps):
         member_ids = []
