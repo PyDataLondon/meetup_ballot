@@ -34,7 +34,7 @@ def run_ballot():
     meetup_urlname = get_environment_variable(MEETUP_URLNAME_VAR)
 
     logging.info('Creating Meetup Client')
-    client = MeetupClient(key=meetup_key, meetup_urlname=meetup_urlname)
+    client = MeetupClient(key=meetup_key, urlname=meetup_urlname)
 
     logging.info('Getting next event id')
     next_event_id = client.get_next_event_id()
