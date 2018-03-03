@@ -50,7 +50,7 @@ def run_ballot():
     random_members = select_random(member_ids, max_rsvps)
 
     logging.info('Marking RSVPs to Yes for random members')
-    client.mark_rsvps_to_yes(random_members)
+    client.mark_rsvps_to_yes(next_event_id, random_members)
 
 
 if __name__ == '__main__':
