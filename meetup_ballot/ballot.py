@@ -105,7 +105,7 @@ def run_ballot(meetup_key, meetup_urlname):
 
     logging.info('Marking RSVPs to Yes for random members')
     attending_members = coorg_hosts_member_ids + random_members
-    # client.mark_rsvps_to_yes(next_event_id, attending_members)
+    client.mark_rsvps_to_yes(next_event_id, attending_members)
     return len(attending_members)
 
 
