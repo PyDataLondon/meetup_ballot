@@ -1,4 +1,5 @@
-echo "Exporting environment variables"
+#!/usr/bin/env bash
+echo "Exporting environment variables from .env"
 export $(cat .env | xargs)
 echo "Starting Ballot Runner"
 PYTHONPATH='.' python meetup_ballot/ballot.py
