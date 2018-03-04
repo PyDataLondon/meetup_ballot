@@ -3,6 +3,8 @@
 import logging
 import requests
 
+from collections import Counter
+
 RSVP_YES = 'yes'
 
 
@@ -90,6 +92,16 @@ class MeetupClient:
         append_url = 'events/{event_id}/rsvps'.format(event_id=event_id)
         response = self.send_get_request({}, append_url=append_url)
         return response.json()
+
+    def get_rsvsps_response_wise_count(self, rsvps):
+        """
+        Get the response wise count of RSVPS.
+        :param rsvps:
+        :return: Counter dict of response:
+        e.g. Counter({'no': 42, 'waitlist': 162, 'yes': 254})
+        """
+        response = Counter([rsvp['response'] for rsvp in rsvps])
+        return response
 
     def get_coorganizers_and_hosts_from_rsvps(self, rsvps):
         """

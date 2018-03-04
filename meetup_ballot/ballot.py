@@ -64,12 +64,19 @@ def check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days):
     return next_event_time < time_after_delta.timestamp()
 
 
+def check_if_ballot_already_ran(client, rsvps, max_rsvps):
+    response = client.get_rsvsps_response_wise_count(rsvps)
+    logging.info('Response wise RSVPS: %s', response)
+    return response['yes'] >= max_rsvps
+
+
 def run_ballot(meetup_key, meetup_urlname):
     """
     Run's the PyData London Meetups's RSVP Ballot.
     :param meetup_key: Meetup.com API Key
     :param meetup_urlname: Url name of the meetup group.
-    :return: None
+    :return: Attending members count if ballot is run for the
+    first time for the given event else 0.
     """
 
     logging.info('Creating Meetup Client')
@@ -85,6 +92,11 @@ def run_ballot(meetup_key, meetup_urlname):
     member_ids = client.get_member_ids_from_rsvps(event_rsvps)
     max_rsvps = min(len(member_ids), int(get_environment_variable(MAX_RSVPS_VAR)))
 
+    logging.info('Check if Ballot is already ran for the upcoming event')
+    if check_if_ballot_already_ran(client, event_rsvps, max_rsvps):
+        logging.info('Ballot already ran for upcoming meetup, Aborting.')
+        return 0
+
     logging.info('Get event hosts and coorganizers')
     coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(event_rsvps)
 
@@ -93,7 +105,8 @@ def run_ballot(meetup_key, meetup_urlname):
 
     logging.info('Marking RSVPs to Yes for random members')
     attending_members = coorg_hosts_member_ids + random_members
-    client.mark_rsvps_to_yes(next_event_id, attending_members)
+    # client.mark_rsvps_to_yes(next_event_id, attending_members)
+    return len(attending_members)
 
 
 def main():
