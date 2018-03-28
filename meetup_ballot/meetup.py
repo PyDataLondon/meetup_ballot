@@ -1,9 +1,12 @@
 # coding=utf-8
 
+import time
 import logging
 import requests
 
 from collections import Counter
+
+NUM_OF_REQUESTS_TO_SLEEP_AFTER = 2
 
 RSVP_YES = 'yes'
 
@@ -74,12 +77,21 @@ class MeetupClient:
         :return: None
         """
         url = '{base_url}/2/rsvp'.format(base_url=self.base_url)
-        for member_id in member_ids:
-            logging.info('Setting RSVP to yes for member_id: %s', member_id)
+        total_members = len(member_ids)
+        for i in range(total_members):
+            if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
+                time.sleep(1)
+            member_id = member_ids[i]
+            logging.info('%s/%s Setting RSVP to yes for member_id: %s', i + 1, total_members, member_id)
             data = {'member_id': member_id, 'event_id': event_id, 'rsvp': RSVP_YES, 'key': self.key}
             response = requests.post(url, data=data)
             if response.status_code != 201:
-                logging.info('Something went wrong! Response code: %s', response.status_code)
+                try:
+                    response_json = response.json()
+                except Exception:
+                    response_json = 'no response json'
+                logging.info('Something went wrong! Response code: %s, Response: %s', response.status_code,
+                             response_json)
             else:
                 logging.info('Marked member_id: %s"s RSVP as Yes', member_id)
 
