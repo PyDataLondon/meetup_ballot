@@ -66,7 +66,9 @@ class MeetupClient:
         if response.status_code == 200 and len(response.json()) > 0:
             return response.json()[0]['time']
         else:
-            logging.error('No future events scheduled')
+            logging.info('Next event info response: %s', response.status_code)
+            logging.info('Next event info response: %s', response.json())
+            logging.error('Either no future events scheduled or unable to fetch any.')
             return float('INF')
 
     def mark_rsvps_to_yes(self, event_id, member_ids):
