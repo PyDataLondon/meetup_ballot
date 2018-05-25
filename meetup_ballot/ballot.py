@@ -11,7 +11,7 @@ from meetup_ballot.meetup import MeetupClient
 MEETUP_KEY_VAR = 'MEETUP_KEY'
 MEETUP_URLNAME_VAR = 'MEETUP_URLNAME'
 MAX_RSVPS_VAR = 'MAX_RSVPS'
-RSVP_BEFORE_DAYS = 7
+RSVP_BEFORE_DAYS = 10
 
 
 def setup_logging():
