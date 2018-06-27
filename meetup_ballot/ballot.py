@@ -11,7 +11,7 @@ from meetup_ballot.meetup import MeetupClient
 MEETUP_KEY_VAR = 'MEETUP_KEY'
 MEETUP_URLNAME_VAR = 'MEETUP_URLNAME'
 MAX_RSVPS_VAR = 'MAX_RSVPS'
-RSVP_BEFORE_DAYS = 10
+RSVP_BEFORE_DAYS = 'RSVP_BEFORE_DAYS'
 
 
 def setup_logging():
@@ -119,15 +119,16 @@ def main():
     setup_logging()
     meetup_key = get_environment_variable(MEETUP_KEY_VAR)
     meetup_urlname = get_environment_variable(MEETUP_URLNAME_VAR)
-    if check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days=RSVP_BEFORE_DAYS):
-        logging.info('The next meetup is less than %s days ago.', RSVP_BEFORE_DAYS)
+    rsvp_before_days = int(get_environment_variable(RSVP_BEFORE_DAYS)
+    if check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days=rsvp_before_days):
+        logging.info('The next meetup is less than %s days ago.', rsvp_before_days)
         logging.info('Running the PyData London Meetup"s RSVP Ballot')
         try:
             run_ballot(meetup_key, meetup_urlname)
         except Exception as e:
             logging.exception(e)
     else:
-        logging.info('The next meetup is more than %s days ago.', RSVP_BEFORE_DAYS)
+        logging.info('The next meetup is more than %s days ago.', rsvp_before_days)
         logging.info('It"s not the right time to run the ballot.')
 
 
