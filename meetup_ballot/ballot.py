@@ -119,7 +119,7 @@ def main():
     setup_logging()
     meetup_key = get_environment_variable(MEETUP_KEY_VAR)
     meetup_urlname = get_environment_variable(MEETUP_URLNAME_VAR)
-    rsvp_before_days = int(get_environment_variable(RSVP_BEFORE_DAYS)
+    rsvp_before_days = int(get_environment_variable(RSVP_BEFORE_DAYS))
     if check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days=rsvp_before_days):
         logging.info('The next meetup is less than %s days ago.', rsvp_before_days)
         logging.info('Running the PyData London Meetup"s RSVP Ballot')
