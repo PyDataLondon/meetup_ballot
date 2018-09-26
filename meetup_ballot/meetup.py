@@ -57,6 +57,25 @@ class MeetupClient:
             logging.error('No future events scheduled')
             return 0
 
+    def get_member_details(self, member_id):
+        """
+        Returns member details
+        :param member_id: meetup.com id of the member
+        :return: json of member details
+        """
+        url = '{base_url}/2/member/{member_id}'.format(base_url=self.base_url, member_id=member_id)
+        response = requests.get(url=url, params={'key': self.key, 'page': 1})
+        return response.json()
+
+    def get_member_name(self, member_id):
+        """
+        Get member name
+        :param member_id: meetup.com id of the member
+        :return: name of the member.
+        """
+        member_details = self.get_member_details(member_id)
+        return member_details.get('name')
+
     def get_next_event_time(self):
         """
         Unix Time of next event in milliseconds in UTC.

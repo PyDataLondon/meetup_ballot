@@ -70,6 +70,29 @@ def check_if_ballot_already_ran(client, rsvps, max_rsvps):
     return response['yes'] >= max_rsvps
 
 
+def does_member_name_looks_like_spam(member_name):
+    """Filter bad/spam names"""
+    return False
+
+
+def filter_spam_members(member_ids, client):
+    """
+    Returns a list of good member_ids by filtering the spam members
+    :param member_ids:
+    :param client:
+    :return:
+    """
+    good_members = []
+    for member_id in member_ids:
+        member_name = client.get_member_name(member_id)
+        if not does_member_name_looks_like_spam(member_name):
+            logging.info('Good member name: {}'.format(member_name))
+            good_members.append(member_id)
+        else:
+            logging.info('Bad Member name: {}'.format(member_name))
+    return good_members
+
+
 def run_ballot(meetup_key, meetup_urlname):
     """
     Run's the PyData London Meetups's RSVP Ballot.
@@ -90,7 +113,10 @@ def run_ballot(meetup_key, meetup_urlname):
 
     logging.info('Next event RSVPS: %s', len(event_rsvps))
     member_ids = client.get_member_ids_from_rsvps(event_rsvps)
-    max_rsvps = min(len(member_ids), int(get_environment_variable(MAX_RSVPS_VAR)))
+
+    good_member_ids = filter_spam_members(member_ids, client)
+
+    max_rsvps = min(len(good_member_ids), int(get_environment_variable(MAX_RSVPS_VAR)))
 
     logging.info('Check if Ballot is already ran for the upcoming event')
     if check_if_ballot_already_ran(client, event_rsvps, max_rsvps):
@@ -101,7 +127,7 @@ def run_ballot(meetup_key, meetup_urlname):
     coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(event_rsvps)
 
     logging.info('Selecting random: %s members', max_rsvps)
-    random_members = select_random(member_ids, max_rsvps)
+    random_members = select_random(good_member_ids, max_rsvps)
 
     logging.info('Marking RSVPs to Yes for random members')
     attending_members = coorg_hosts_member_ids + random_members
