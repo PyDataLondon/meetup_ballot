@@ -72,6 +72,8 @@ def check_if_ballot_already_ran(client, rsvps, max_rsvps):
 
 def does_member_name_looks_like_spam(member_name):
     """Filter bad/spam names"""
+    if not member_name:
+        return False
     if len(member_name.split()) < 2:
         return False
     for sub_name in member_name.split():
@@ -91,10 +93,10 @@ def filter_spam_members(member_ids, client):
     for member_id in member_ids:
         member_name = client.get_member_name(member_id)
         if not does_member_name_looks_like_spam(member_name):
-            logging.info('Good member name: {}'.format(member_name))
+            logging.info('Good member name: {} (ID: {})'.format(member_name, member_id))
             good_members.append(member_id)
         else:
-            logging.info('Bad Member name: {}'.format(member_name))
+            logging.info('Bad Member name: {} (ID: {})'.format(member_name, member_id))
     return good_members
 
 
