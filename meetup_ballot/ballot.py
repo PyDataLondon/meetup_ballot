@@ -72,7 +72,12 @@ def check_if_ballot_already_ran(client, rsvps, max_rsvps):
 
 def does_member_name_looks_like_spam(member_name):
     """Filter bad/spam names"""
-    return False
+    if len(member_name.split()) < 2:
+        return False
+    for sub_name in member_name.split():
+        if len(sub_name) < 2:
+            return False
+    return True
 
 
 def filter_spam_members(member_ids, client):
