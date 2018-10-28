@@ -126,7 +126,7 @@ class MeetupClient:
         response = self.send_get_request({}, append_url=append_url)
         return response.json()
 
-    def get_rsvsps_response_wise_count(self, rsvps):
+    def get_response_wise_rsvps_count(self, rsvps):
         """
         Get the response wise count of RSVPS.
         :param rsvps:

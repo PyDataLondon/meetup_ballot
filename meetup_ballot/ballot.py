@@ -67,7 +67,7 @@ def check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days):
 
 
 def check_if_ballot_already_ran(client, rsvps, max_rsvps):
-    response = client.get_rsvsps_response_wise_count(rsvps)
+    response = client.get_response_wise_rsvps_count(rsvps)
     logging.info('Response wise RSVPS: %s', response)
     return response['yes'] >= max_rsvps
 
@@ -126,20 +126,25 @@ def run_ballot(meetup_key, meetup_urlname):
     logging.info('Next event RSVPS: %s', len(event_rsvps))
     member_ids = client.get_member_ids_from_rsvps(event_rsvps)
 
+    logging.info('Filtering spam members')
     good_member_ids = filter_spam_members(member_ids, client)
 
-    max_rsvps = min(len(good_member_ids), int(get_environment_variable(MAX_RSVPS_VAR)))
-
-    logging.info('Check if Ballot is already ran for the upcoming event')
-    if check_if_ballot_already_ran(client, event_rsvps, max_rsvps):
-        logging.info('Ballot already ran for upcoming meetup, Aborting.')
-        return 0
-
-    logging.info('Get event hosts and coorganizers')
+    logging.info('Getting event hosts and coorganizers')
     coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(event_rsvps)
 
-    logging.info('Selecting random: %s members', max_rsvps)
-    random_members = select_random(good_member_ids, max_rsvps)
+    response_wise_rsvps = client.get_response_wise_rsvps_count(event_rsvps)
+    logging.info("Current RSVP responses: %s", response_wise_rsvps)
+    max_rsvps = int(get_environment_variable(MAX_RSVPS_VAR))
+
+    current_rsvps = response_wise_rsvps['yes']
+    rsvps_available = max_rsvps - current_rsvps
+    logging.info("RSVPs available %s", rsvps_available)
+
+    rsvps_possible = min(len(good_member_ids), rsvps_available)
+    logging.info("RSVPs possible %s", rsvps_possible)
+
+    logging.info('Selecting random: %s members', rsvps_possible)
+    random_members = select_random(good_member_ids, rsvps_possible)
 
     logging.info('Marking RSVPs to Yes for random members')
     attending_members = coorg_hosts_member_ids + random_members
