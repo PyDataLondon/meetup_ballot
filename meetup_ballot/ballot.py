@@ -5,6 +5,7 @@ from datetime import timedelta
 import random
 import logging
 import os
+import time
 
 from meetup_ballot.meetup import MeetupClient
 
@@ -12,6 +13,7 @@ MEETUP_KEY_VAR = 'MEETUP_KEY'
 MEETUP_URLNAME_VAR = 'MEETUP_URLNAME'
 MAX_RSVPS_VAR = 'MAX_RSVPS'
 RSVP_BEFORE_DAYS = 'RSVP_BEFORE_DAYS'
+NUM_OF_REQUESTS_TO_SLEEP_AFTER = 2
 
 
 def setup_logging():
@@ -90,7 +92,10 @@ def filter_spam_members(member_ids, client):
     :return:
     """
     good_members = []
-    for member_id in member_ids:
+    for i in range(len(member_ids)):
+        member_id = member_ids[i]
+        if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
+            time.sleep(1)
         member_name = client.get_member_name(member_id)
         if not does_member_name_looks_like_spam(member_name):
             logging.info('Good member name: {} (ID: {})'.format(member_name, member_id))
