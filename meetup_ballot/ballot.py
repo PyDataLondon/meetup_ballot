@@ -96,7 +96,11 @@ def filter_spam_members(member_ids, client):
         member_id = member_ids[i]
         if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
             time.sleep(1)
-        member_name = client.get_member_name(member_id)
+        try:
+            member_name = client.get_member_name(member_id)
+        except Exception as ex:
+            logging.exception('Something went wrong while trying to get users information.')
+            continue
         if not does_member_name_looks_like_spam(member_name):
             logging.info('Good member name: {} (ID: {})'.format(member_name, member_id))
             good_members.append(member_id)

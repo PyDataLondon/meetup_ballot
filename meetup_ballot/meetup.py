@@ -64,6 +64,7 @@ class MeetupClient:
         :return: json of member details
         """
         url = '{base_url}/2/member/{member_id}'.format(base_url=self.base_url, member_id=member_id)
+        logging.info('Getting member details from url: {}'.format(url))
         response = requests.get(url=url, params={'key': self.key, 'page': 1})
         return response.json()
 
