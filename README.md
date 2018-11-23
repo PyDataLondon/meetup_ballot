@@ -1,5 +1,7 @@
 # Pydata London Meetup Ballot
 
+[![Build Status](https://travis-ci.org/chfw/meetup_ballot.svg?branch=master)](https://travis-ci.org/chfw/meetup_ballot)
+
 > Used to select members for the next meetup. 
 
 ## Installation
