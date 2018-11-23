@@ -1,0 +1,12 @@
+sudo: false
+language: python
+notifications:
+  email: false
+python:
+  - 3.6
+before_install:
+  - pip install tests/requirements.txt
+script:
+  - nosetests tests && flake8 .
+after_success:
+  codecov

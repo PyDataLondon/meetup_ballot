@@ -1,0 +1,5 @@
+nosetests
+flake8
+codecov
+coverage
+
