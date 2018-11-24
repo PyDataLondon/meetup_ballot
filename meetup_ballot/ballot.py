@@ -184,7 +184,7 @@ def main():
         logging.info(
             "The next meetup is less than %s days ago.", rsvp_before_days
         )
-        logging.info('Running the PyData London Meetup"s RSVP Ballot')
+        logging.info("Running the PyData London Meetup's RSVP Ballot")
         try:
             run_ballot(meetup_key, meetup_urlname)
         except Exception as e:
