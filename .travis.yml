@@ -7,6 +7,6 @@ python:
 before_install:
   - pip install -r tests/requirements.txt
 script:
-  - nosetests tests && flake8 .
+  - nosetests --with-coverage --cover-package meetup_ballot tests && flake8 .
 after_success:
   codecov
