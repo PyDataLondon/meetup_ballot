@@ -38,9 +38,9 @@ def get_environment_variable(var):
     """
     try:
         return os.environ[var]
-    except KeyError as excep:
+    except KeyError:
         logging.error("Environment variable: %s not found", var)
-        raise excep
+        raise
 
 
 def select_random(sample_list, sample_size):
@@ -96,8 +96,7 @@ def filter_spam_members(member_ids, client):
     :return:
     """
     good_members = []
-    for i in range(len(member_ids)):
-        member_id = member_ids[i]
+    for i, member_id in enumerate(member_ids):
         if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
             time.sleep(1)
         try:
