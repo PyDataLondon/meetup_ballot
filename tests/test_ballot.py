@@ -60,3 +60,17 @@ def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
     actual_attending_number = ballot.run_ballot('key', 'url')
 
     eq_(2, actual_attending_number)
+
+
+@patch('meetup_ballot.ballot.run_ballot')
+@patch('meetup_ballot.ballot.get_environment_variable')
+@patch('meetup_ballot.ballot.check_meetup_is_in_less_than_delta_time')
+def test_main(mocked_delta_time, mocked_env, mocked_run):
+    mocked_delta_time.return_value = True
+    mocked_env.side_effect = [
+        "key", "url", "1"
+    ]
+
+    ballot.main()
+
+    mocked_run.assert_called_with("key", "url")
