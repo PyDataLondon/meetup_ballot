@@ -39,3 +39,24 @@ def test_filter_spam_members(_):
     actual = ballot.filter_spam_members([1, 2, 3, 4], mocked_client)
 
     eq_([4], actual)
+
+
+@patch('meetup_ballot.ballot.filter_spam_members')
+@patch('meetup_ballot.ballot.get_environment_variable')
+@patch('meetup_ballot.ballot.MeetupClient')
+def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
+    mocked_client_cls.return_value = MagicMock(
+        get_response_wise_rsvps_count=MagicMock(
+            return_value=dict(yes=100)
+        ),
+        get_coorganizers_and_hosts_from_rsvps=MagicMock(
+            return_value=['co-organizers']
+        )
+    )
+
+    mocked_env.return_value = 101
+    mocked_spam.return_value = ['a', 'b', 'c']
+
+    actual_attending_number = ballot.run_ballot('key', 'url')
+
+    eq_(2, actual_attending_number)
