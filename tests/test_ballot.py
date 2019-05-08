@@ -44,7 +44,7 @@ def test_filter_spam_members(_):
 @patch('meetup_ballot.ballot.filter_spam_members')
 @patch('meetup_ballot.ballot.get_environment_variable')
 @patch('meetup_ballot.ballot.MeetupClient')
-def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
+def test_run_ballot(mocked_client_cls, mocked_env, mocked_spam):
     mocked_client_cls.return_value = MagicMock(
         get_response_wise_rsvps_count=MagicMock(
             return_value=dict(yes=100)
@@ -65,12 +65,31 @@ def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
 @patch('meetup_ballot.ballot.run_ballot')
 @patch('meetup_ballot.ballot.get_environment_variable')
 @patch('meetup_ballot.ballot.check_meetup_is_in_less_than_delta_time')
-def test_main(mocked_delta_time, mocked_env, mocked_run):
+@patch('meetup_ballot.ballot.is_script_ran_from_cron_or_manually_triggered')
+def test_main(mocked_script_run_source, mocked_delta_time, mocked_env, mocked_run):
+    mocked_script_run_source.return_value = True
     mocked_delta_time.return_value = True
     mocked_env.side_effect = [
         "access_token", "url", "1"
     ]
 
     ballot.main()
-
     mocked_run.assert_called_with("access_token", "url")
+
+
+@patch('meetup_ballot.ballot.get_environment_variable')
+def test_is_script_ran_from_cron_or_manually_triggered__one_true(mocked_env):
+    mocked_env.side_effect = [True, False]
+
+    script_run = ballot.is_script_ran_from_cron_or_manually_triggered()
+
+    eq_(True, script_run)
+
+
+@patch('meetup_ballot.ballot.get_environment_variable')
+def test_is_script_ran_from_cron_or_manually_triggered__both_false(mocked_env):
+    mocked_env.side_effect = [False, False]
+
+    script_run = ballot.is_script_ran_from_cron_or_manually_triggered()
+
+    eq_(False, script_run)
