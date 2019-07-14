@@ -93,7 +93,7 @@ def read_name_exceptions(name_exceptions_csv):
     """ Read member names from csv files"""
     member_ids = []
     with open(name_exceptions_csv, newline='') as name_exceptions:
-        reader = csv.reader(name_exceptions, delimiter=' ')
+        reader = csv.reader(name_exceptions, delimiter=',')
         for row in reader:
             member_ids.append(row[0])
     return member_ids

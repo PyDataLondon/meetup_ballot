@@ -8,7 +8,8 @@ def test_member_name():
         None,
         'Word',
         'A BC',
-        'Uncle Bob'
+        'Uncle Bob',
+        'ExceptionMemberName'
     ]
 
     actual = [ballot.does_member_name_looks_like_spam(name)
@@ -18,6 +19,7 @@ def test_member_name():
         True,
         True,
         True,
+        False,
         False
     ]
     eq_(expected, actual)
@@ -29,16 +31,17 @@ def test_filter_spam_members(_):
         None,
         'Word',
         'A BC',
-        'Uncle Bob'
+        'Uncle Bob',
+        'ExceptionMemberName'
     ]
     mocked_client = MagicMock(
         get_member_name=MagicMock(
             side_effect=names
         )
     )
-    actual = ballot.filter_spam_members([1, 2, 3, 4], mocked_client)
+    actual = ballot.filter_spam_members([1, 2, 3, 4, 5], mocked_client, 'name_exceptions.csv')
 
-    eq_([4], actual)
+    eq_([4, 5], actual)
 
 
 @patch('meetup_ballot.ballot.filter_spam_members')
@@ -57,7 +60,7 @@ def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
     mocked_env.return_value = 101
     mocked_spam.return_value = ['a', 'b', 'c']
 
-    actual_attending_number = ballot.run_ballot('key', 'url')
+    actual_attending_number = ballot.run_ballot('key', 'url', 'name_exceptions.csv')
 
     eq_(2, actual_attending_number)
 
