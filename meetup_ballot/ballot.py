@@ -92,7 +92,7 @@ def does_member_name_looks_like_spam(member_name):
 def read_name_exceptions(name_exceptions_csv):
     """ Read member names from csv files"""
     member_ids = []
-    with open(name_exceptions_csv, newline='') as name_exceptions:
+    with open(name_exceptions_csv) as name_exceptions:
         reader = csv.reader(name_exceptions, delimiter=',')
         for row in reader:
             member_ids.append(row[0])
@@ -107,6 +107,7 @@ def filter_spam_members(member_ids, client, name_exceptions_csv):
     :return:
     """
     good_members = []
+    name_exceptions = read_name_exceptions(name_exceptions_csv)
     for i, member_id in enumerate(member_ids):
         if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
             time.sleep(1)
@@ -123,7 +124,7 @@ def filter_spam_members(member_ids, client, name_exceptions_csv):
             )
             good_members.append(member_id)
         else:
-            if member_id in read_name_exceptions(name_exceptions_csv):
+            if member_id in name_exceptions:
                 logging.info(
                     "Good member name (is in name_exceptions): {} (ID: {})".format(member_name, member_id)
                 )
