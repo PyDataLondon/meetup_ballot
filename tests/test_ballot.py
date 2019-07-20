@@ -20,7 +20,7 @@ def test_member_name():
         True,
         True,
         False,
-        False
+        True
     ]
     eq_(expected, actual)
 
