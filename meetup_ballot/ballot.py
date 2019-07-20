@@ -6,6 +6,7 @@ import random
 import logging
 import os
 import time
+import csv
 
 from meetup_ballot.meetup import MeetupClient
 
@@ -14,7 +15,7 @@ MEETUP_URLNAME_VAR = "MEETUP_URLNAME"
 MAX_RSVPS_VAR = "MAX_RSVPS"
 RSVP_BEFORE_DAYS = "RSVP_BEFORE_DAYS"
 NUM_OF_REQUESTS_TO_SLEEP_AFTER = 2
-
+NAME_EXCEPTIONS_CSV = "NAME_EXCEPTIONS_CSV"
 
 def setup_logging():
     """
@@ -88,7 +89,17 @@ def does_member_name_looks_like_spam(member_name):
     return False
 
 
-def filter_spam_members(member_ids, client):
+def read_name_exceptions(name_exceptions_csv):
+    """ Read member names from csv files"""
+    member_ids = []
+    with open(name_exceptions_csv) as name_exceptions:
+        reader = csv.reader(name_exceptions, delimiter=',')
+        for row in reader:
+            member_ids.append(int(row[0]))
+    return member_ids
+
+
+def filter_spam_members(member_ids, client, name_exceptions_csv):
     """
     Returns a list of good member_ids by filtering the spam members
     :param member_ids:
@@ -96,6 +107,7 @@ def filter_spam_members(member_ids, client):
     :return:
     """
     good_members = []
+    name_exceptions = read_name_exceptions(name_exceptions_csv)
     for i, member_id in enumerate(member_ids):
         if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
             time.sleep(1)
@@ -112,13 +124,19 @@ def filter_spam_members(member_ids, client):
             )
             good_members.append(member_id)
         else:
-            logging.info(
-                "Bad Member name: {} (ID: {})".format(member_name, member_id)
-            )
+            if member_id in name_exceptions:
+                logging.info(
+                    "Good member name (is in name_exceptions): {} (ID: {})".format(member_name, member_id)
+                )
+                good_members.append(member_id)
+            else:
+                logging.info(
+                    "Bad member name: {} (ID: {})".format(member_name, member_id)
+                )
     return good_members
 
 
-def run_ballot(meetup_key, meetup_urlname):
+def run_ballot(meetup_key, meetup_urlname, name_exceptions_csv):
     """
     Run's the PyData London Meetups's RSVP Ballot.
     :param meetup_key: Meetup.com API Key
@@ -140,7 +158,7 @@ def run_ballot(meetup_key, meetup_urlname):
     member_ids = client.get_member_ids_from_rsvps(event_rsvps)
 
     logging.info("Filtering spam members")
-    good_member_ids = filter_spam_members(member_ids, client)
+    good_member_ids = filter_spam_members(member_ids, client, name_exceptions_csv)
 
     logging.info("Getting event hosts and coorganizers")
     coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(
@@ -178,6 +196,7 @@ def main():
     meetup_key = get_environment_variable(MEETUP_KEY_VAR)
     meetup_urlname = get_environment_variable(MEETUP_URLNAME_VAR)
     rsvp_before_days = int(get_environment_variable(RSVP_BEFORE_DAYS))
+    name_exceptions_csv = get_environment_variable(NAME_EXCEPTIONS_CSV)
     if check_meetup_is_in_less_than_delta_time(
         meetup_key, meetup_urlname, days=rsvp_before_days
     ):
@@ -186,7 +205,7 @@ def main():
         )
         logging.info("Running the PyData London Meetup's RSVP Ballot")
         try:
-            run_ballot(meetup_key, meetup_urlname)
+            run_ballot(meetup_key, meetup_urlname, name_exceptions_csv)
         except Exception as e:
             logging.exception(e)
     else:
