@@ -17,11 +17,11 @@ class MeetupClient:
     Client for accessing Meetup.com API
     """
 
-    def __init__(self, key, urlname=None):
-        self.key = key
+    def __init__(self, access_token, urlname=None):
         self.urlname = urlname
         self.base_url = "https://api.meetup.com"
         self.url = "{}/{}".format(self.base_url, self.urlname)
+        self.headers = {'Authorization': f'Bearer {access_token}'}
         self.setup_logging()
 
     def setup_logging(self):
@@ -34,7 +34,7 @@ class MeetupClient:
             level=logging.INFO, format=LOG_FORMAT, filename=logging_file
         )
 
-    def send_get_request(self, params, append_url):
+    def send_get_request(self, append_url, params=None):
         """
         Send GET request to meetup's API.
         :param params: dict of params
@@ -44,9 +44,7 @@ class MeetupClient:
         url = "{default_url}/{append_url}".format(
             default_url=self.url, append_url=append_url
         )
-        default_params = {"key": self.key}
-        req_params = {**params, **default_params}
-        response = requests.get(url, params=req_params)
+        response = requests.get(url, params=params, headers=self.headers)
         return response
 
     def get_next_event_id(self):
@@ -54,7 +52,7 @@ class MeetupClient:
         Id of the next meetup of the group.
         :return:
         """
-        response = self.send_get_request({"page": 1}, "events")
+        response = self.send_get_request("events", params={"page": 1})
         if response.status_code == 200 and len(response.json()) > 0:
             return response.json()[0]["id"]
         else:
@@ -72,7 +70,7 @@ class MeetupClient:
         )
 
         logging.info("Getting member details from url: {}".format(url))
-        response = requests.get(url=url, params={"key": self.key, "page": 1})
+        response = requests.get(url=url, params={"page": 1}, headers=self.headers)
         return response.json()
 
     def get_member_name(self, member_id):
@@ -82,14 +80,14 @@ class MeetupClient:
         :return: name of the member.
         """
         member_details = self.get_member_details(member_id)
-        return member_details.get("name")
+        return member_details["name"]
 
     def get_next_event_time(self):
         """
         Unix Time of next event in milliseconds in UTC.
         :return: int
         """
-        response = self.send_get_request({"page": 1}, "events")
+        response = self.send_get_request("events", params={"page": 1})
         if response.status_code == 200 and len(response.json()) > 0:
             return response.json()[0]["time"]
         else:
@@ -125,9 +123,8 @@ class MeetupClient:
                 "member_id": member_id,
                 "event_id": event_id,
                 "rsvp": RSVP_YES,
-                "key": self.key,
             }
-            response = requests.post(url, data=data)
+            response = requests.post(url, data=data, headers=self.headers)
             if response.status_code != 201:
                 try:
                     response_json = response.json()
@@ -148,7 +145,7 @@ class MeetupClient:
         :return: json response
         """
         append_url = "events/{event_id}/rsvps".format(event_id=event_id)
-        response = self.send_get_request({}, append_url=append_url)
+        response = self.send_get_request(append_url=append_url)
         return response.json()
 
     def get_response_wise_rsvps_count(self, rsvps):

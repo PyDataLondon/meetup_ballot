@@ -5,25 +5,23 @@ from unittest.mock import patch, MagicMock
 from meetup_ballot.meetup import MeetupClient
 
 DEFAULT_URL_NAME = "pydatalondon"
-DEFAULT_KEY = "abcd"
+DEFAULT_ACCESS_TOKEN = "abcd"
 
 
 class TestMeetup(TestCase):
     def setUp(self):
-        self.client = MeetupClient(key=DEFAULT_KEY, urlname=DEFAULT_URL_NAME)
+        self.client = MeetupClient(access_token=DEFAULT_ACCESS_TOKEN, urlname=DEFAULT_URL_NAME)
 
     @patch("requests.get")
     def test_send_get_request(self, mocked_get):
         append_url = "rsvps"
         test_params = dict(hello="world")
-        self.client.send_get_request(test_params, append_url)
+        self.client.send_get_request(append_url, test_params)
 
         expected_url = "https://api.meetup.com/{url_name}/{append_url}".format(
             url_name=DEFAULT_URL_NAME, append_url=append_url
         )
-        expected_params = dict(key=DEFAULT_KEY)
-        expected_params.update(test_params)
-        mocked_get.assert_called_with(expected_url, params=expected_params)
+        mocked_get.assert_called_with(expected_url, params=test_params, headers=self.client.headers)
 
     @patch("requests.get")
     def test_get_next_event_id(self, mocked_get):
@@ -45,9 +43,9 @@ class TestMeetup(TestCase):
         self.client.get_member_details("abc")
 
         expected_url = "https://api.meetup.com/2/member/abc"
-        expected_params = {"key": "abcd", "page": 1}
+        expected_params = {"page": 1}
 
-        mocked_get.assert_called_with(url=expected_url, params=expected_params)
+        mocked_get.assert_called_with(url=expected_url, params=expected_params, headers=self.client.headers)
 
     @patch("requests.get")
     def test_get_member_name(self, mocked_get):
@@ -85,9 +83,8 @@ class TestMeetup(TestCase):
             "member_id": "p2",
             "event_id": "event_id",
             "rsvp": "yes",
-            "key": "abcd",
         }
-        mocked_post.assert_called_with(expected_url, data=expected_data)
+        mocked_post.assert_called_with(expected_url, data=expected_data, headers=self.client.headers)
 
     @patch("requests.get")
     def test_get_rsvps(self, mocked_get):
@@ -100,7 +97,7 @@ class TestMeetup(TestCase):
         expected_url = (
             "https://api.meetup.com/" + "pydatalondon/events/event_id/rsvps"
         )
-        mocked_get.assert_called_with(expected_url, params={"key": "abcd"})
+        mocked_get.assert_called_with(expected_url, headers=self.client.headers, params=None)
 
     def test_get_response_wise_rsvps_count(self):
         fake_rsvps = [{"response": "yes"}, {"response": "no"}]

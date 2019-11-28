@@ -9,7 +9,7 @@ import time
 
 from meetup_ballot.meetup import MeetupClient
 
-MEETUP_KEY_VAR = "MEETUP_KEY"
+MEETUP_ACCESS_TOKEN_VAR = "MEETUP_KEY"
 MEETUP_URLNAME_VAR = "MEETUP_URLNAME"
 MAX_RSVPS_VAR = "MAX_RSVPS"
 RSVP_BEFORE_DAYS = "RSVP_BEFORE_DAYS"
@@ -54,18 +54,18 @@ def select_random(sample_list, sample_size):
     return sample
 
 
-def check_meetup_is_in_less_than_delta_time(meetup_key, meetup_urlname, days):
+def check_meetup_is_in_less_than_delta_time(access_token, meetup_urlname, days):
     """
     Checks if the meetup is less than delta days away. Useful
     for triggering cron.
-    :param meetup_key: Meetup.com API Key
+    :param access_token: Meetup.com API access token
     :param meetup_urlname: Meetup's group API.
     :param days:
     :return: bool True if meetup is less than delta days away else False
     """
     today = datetime.utcnow()
     time_after_delta = today + timedelta(days=days)
-    client = MeetupClient(key=meetup_key, urlname=meetup_urlname)
+    client = MeetupClient(access_token=access_token, urlname=meetup_urlname)
     next_event_time = client.get_next_event_time() / 1000
     return next_event_time < time_after_delta.timestamp()
 
@@ -118,17 +118,17 @@ def filter_spam_members(member_ids, client):
     return good_members
 
 
-def run_ballot(meetup_key, meetup_urlname):
+def run_ballot(meetup_acess_token, meetup_urlname):
     """
     Run's the PyData London Meetups's RSVP Ballot.
-    :param meetup_key: Meetup.com API Key
+    :param meetup_acess_token: Meetup.com API access token
     :param meetup_urlname: Url name of the meetup group.
     :return: Attending members count if ballot is run for the
     first time for the given event else 0.
     """
 
     logging.info("Creating Meetup Client")
-    client = MeetupClient(key=meetup_key, urlname=meetup_urlname)
+    client = MeetupClient(access_token=meetup_acess_token, urlname=meetup_urlname)
 
     logging.info("Getting next event id")
     next_event_id = client.get_next_event_id()
@@ -175,18 +175,18 @@ def main():
     :return: None
     """
     setup_logging()
-    meetup_key = get_environment_variable(MEETUP_KEY_VAR)
+    meetup_access_token = get_environment_variable(MEETUP_ACCESS_TOKEN_VAR)
     meetup_urlname = get_environment_variable(MEETUP_URLNAME_VAR)
     rsvp_before_days = int(get_environment_variable(RSVP_BEFORE_DAYS))
     if check_meetup_is_in_less_than_delta_time(
-        meetup_key, meetup_urlname, days=rsvp_before_days
+        meetup_access_token, meetup_urlname, days=rsvp_before_days
     ):
         logging.info(
             "The next meetup is less than %s days ago.", rsvp_before_days
         )
         logging.info("Running the PyData London Meetup's RSVP Ballot")
         try:
-            run_ballot(meetup_key, meetup_urlname)
+            run_ballot(meetup_access_token, meetup_urlname)
         except Exception as e:
             logging.exception(e)
     else:
