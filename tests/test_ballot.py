@@ -57,7 +57,7 @@ def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
     mocked_env.return_value = 101
     mocked_spam.return_value = ['a', 'b', 'c']
 
-    actual_attending_number = ballot.run_ballot('key', 'url')
+    actual_attending_number = ballot.run_ballot('access_token', 'url')
 
     eq_(2, actual_attending_number)
 
@@ -68,9 +68,9 @@ def test_run_ballet(mocked_client_cls, mocked_env, mocked_spam):
 def test_main(mocked_delta_time, mocked_env, mocked_run):
     mocked_delta_time.return_value = True
     mocked_env.side_effect = [
-        "key", "url", "1"
+        "access_token", "url", "1"
     ]
 
     ballot.main()
 
-    mocked_run.assert_called_with("key", "url")
+    mocked_run.assert_called_with("access_token", "url")
