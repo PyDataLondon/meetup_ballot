@@ -25,18 +25,13 @@ def test_member_name():
 
 @patch('time.sleep')
 def test_filter_spam_members(_):
-    names = [
-        None,
-        'Word',
-        'A BC',
-        'Uncle Bob'
+    members = [
+        {"id": 1, "name": None},
+        {"id": 2, "name": 'Word'},
+        {"id": 3, "name": 'A BC'},
+        {"id": 4, "name": 'Uncle Bob'}
     ]
-    mocked_client = MagicMock(
-        get_member_name=MagicMock(
-            side_effect=names
-        )
-    )
-    actual = ballot.filter_spam_members([1, 2, 3, 4], mocked_client)
+    actual = ballot.filter_spam_members(members)
 
     eq_([4], actual)
 

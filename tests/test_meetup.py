@@ -114,7 +114,7 @@ class TestMeetup(TestCase):
         )
         self.assertEqual([1], response)
 
-    def test_get_member_ids_from_rsvps(self):
+    def test_get_members_from_rsvps(self):
         rsvps = [
             get_rsvp(id=1, role=False, host=False),
             get_rsvp(id=2, role=True, host=False),
@@ -122,12 +122,15 @@ class TestMeetup(TestCase):
             get_rsvp(id=4, role=False, host=False),
             get_rsvp(id=5, role=True, host=True),
         ]
-        member_ids = self.client.get_member_ids_from_rsvps(rsvps=rsvps)
-        self.assertListEqual([1, 4], member_ids)
+        member_ids = self.client.get_members_from_rsvps(rsvps=rsvps)
+        self.assertListEqual([
+            {'event_context': {'host': False}, 'id': 1},
+            {'event_context': {'host': False}, 'id': 4}
+        ], member_ids)
 
 
 def get_rsvp(id, role=False, host=False):
-    rsvp = {"member": {"id": id, "event_context": {"host": host}}}
+    rsvp = {"member": {"id": id, "event_context": {"host": host}}, "response": "yes"}
     if role:
         rsvp["member"]["role"] = "coorganizer"
     return rsvp
