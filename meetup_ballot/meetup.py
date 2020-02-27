@@ -6,7 +6,7 @@ import requests
 
 from collections import Counter
 
-NUM_OF_REQUESTS_TO_SLEEP_AFTER = 2
+NUM_OF_REQUESTS_TO_SLEEP_AFTER = 4
 
 RSVP_YES = "yes"
 LOG_FORMAT = "%(asctime)s %(levelname)9s %(lineno)4s %(module)s: %(message)s"
@@ -100,7 +100,7 @@ class MeetupClient:
 
     def mark_rsvps_to_yes(self, event_id, member_ids):
         """
-        Marks the RSVP of all the members in the member_ids
+        Marks the RSVP of all the members in the members
         for a given event_id
 
         :param event_id: id of the event
@@ -108,17 +108,10 @@ class MeetupClient:
         :return: None
         """
         url = "{base_url}/2/rsvp".format(base_url=self.base_url)
-        total_members = len(member_ids)
-        for i in range(total_members):
-            if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
+        for idx, member_id in enumerate(member_ids):
+            if idx % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
                 time.sleep(1)
-            member_id = member_ids[i]
-            logging.info(
-                "%s/%s Setting RSVP to yes for member_id: %s",
-                i + 1,
-                total_members,
-                member_id,
-            )
+            logging.info(f"{idx + 1}/{len(member_ids)} Setting RSVP to yes for member_id: {member_id}")
             data = {
                 "member_id": member_id,
                 "event_id": event_id,
@@ -130,13 +123,9 @@ class MeetupClient:
                     response_json = response.json()
                 except Exception:
                     response_json = "no response json"
-                logging.info(
-                    "Something went wrong! Response code: %s, Response: %s",
-                    response.status_code,
-                    response_json,
-                )
+                logging.info(f"Something went wrong! Response: {response.status_code} :: {response_json}")
             else:
-                logging.info('Marked member_id: %s"s RSVP as Yes', member_id)
+                logging.info(f'Marked member_id: {member_id}"s RSVP as Yes')
 
     def get_rsvps(self, event_id):
         """
@@ -167,20 +156,20 @@ class MeetupClient:
         member_ids = []
         for rsvp in rsvps:
             member = rsvp["member"]
-            if member.get("role") or member["event_context"]["host"]:
+            if member.get("role") or member["event_context"]["host"] and rsvp['response'] == RSVP_YES:
                 member_ids.append(rsvp["member"]["id"])
         logging.info("Co-organizers IDs: %s", member_ids)
         return member_ids
 
-    def get_member_ids_from_rsvps(self, rsvps):
+    def get_members_from_rsvps(self, rsvps):
         """
-        Get member_ids of non-coorganizers and non-hosts from the RSVPS.
+        Get members of non-coorganizers and non-hosts from the RSVPS.
         :param rsvps:
         :return: list of member ids.
         """
-        member_ids = []
+        members = []
         for rsvp in rsvps:
             member = rsvp["member"]
-            if not member.get("role") and not member["event_context"]["host"]:
-                member_ids.append(rsvp["member"]["id"])
-        return member_ids
+            if not member.get("role") and not member["event_context"]["host"] and rsvp['response'] == RSVP_YES:
+                members.append(rsvp["member"])
+        return members

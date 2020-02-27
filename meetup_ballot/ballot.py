@@ -5,7 +5,6 @@ from datetime import timedelta
 import random
 import logging
 import os
-import time
 
 from meetup_ballot.meetup import MeetupClient
 
@@ -15,7 +14,6 @@ MAX_RSVPS_VAR = "MAX_RSVPS"
 RSVP_BEFORE_DAYS = "RSVP_BEFORE_DAYS"
 TRAVIS_EVENT_TYPE = "TRAVIS_EVENT_TYPE"
 MANUAL_BALLOT_TRIGGER = "MANUAL_BALLOT_TRIGGER"
-NUM_OF_REQUESTS_TO_SLEEP_AFTER = 2
 
 
 def setup_logging():
@@ -89,34 +87,21 @@ def does_member_name_looks_like_spam(member_name):
     return False
 
 
-def filter_spam_members(member_ids, client):
+def filter_spam_members(members):
     """
     Returns a list of good member_ids by filtering the spam members
-    :param member_ids:
-    :param client:
-    :return:
+    :param members: list of member objects
+    :return: list of good members
     """
-    good_members = []
-    for i, member_id in enumerate(member_ids):
-        if i % NUM_OF_REQUESTS_TO_SLEEP_AFTER == 0:
-            time.sleep(1)
-        try:
-            member_name = client.get_member_name(member_id)
-        except Exception:
-            logging.exception(
-                "Something went wrong while trying to get users information."
-            )
-            continue
+    good_member_ids = []
+    for member in members:
+        member_id, member_name = member['id'], member['name']
         if not does_member_name_looks_like_spam(member_name):
-            logging.info(
-                "Good member name: {} (ID: {})".format(member_name, member_id)
-            )
-            good_members.append(member_id)
+            logging.info("Good member name: {} (ID: {})".format(member_name, member_id))
+            good_member_ids.append(member_id)
         else:
-            logging.info(
-                "Bad Member name: {} (ID: {})".format(member_name, member_id)
-            )
-    return good_members
+            logging.info("Bad Member name: {} (ID: {})".format(member_name, member_id))
+    return good_member_ids
 
 
 def run_ballot(meetup_acess_token, meetup_urlname):
@@ -138,10 +123,10 @@ def run_ballot(meetup_acess_token, meetup_urlname):
     event_rsvps = client.get_rsvps(next_event_id)
 
     logging.info("Next event RSVPS: %s", len(event_rsvps))
-    member_ids = client.get_member_ids_from_rsvps(event_rsvps)
+    members = client.get_members_from_rsvps(event_rsvps)
 
     logging.info("Filtering spam members")
-    good_member_ids = filter_spam_members(member_ids, client)
+    good_member_ids = filter_spam_members(members)
 
     logging.info("Getting event hosts and coorganizers")
     coorg_hosts_member_ids = client.get_coorganizers_and_hosts_from_rsvps(
@@ -153,7 +138,7 @@ def run_ballot(meetup_acess_token, meetup_urlname):
     max_rsvps = int(get_environment_variable(MAX_RSVPS_VAR))
 
     current_rsvps = response_wise_rsvps["yes"]
-    rsvps_available = max_rsvps - current_rsvps
+    rsvps_available = max(max_rsvps - current_rsvps, 0)
     logging.info("RSVPs available %s", rsvps_available)
 
     rsvps_possible = min(len(good_member_ids), rsvps_available)
