@@ -13,6 +13,8 @@ MEETUP_ACCESS_TOKEN_VAR = "MEETUP_KEY"
 MEETUP_URLNAME_VAR = "MEETUP_URLNAME"
 MAX_RSVPS_VAR = "MAX_RSVPS"
 RSVP_BEFORE_DAYS = "RSVP_BEFORE_DAYS"
+TRAVIS_EVENT_TYPE = "TRAVIS_EVENT_TYPE"
+MANUAL_BALLOT_TRIGGER = "MANUAL_BALLOT_TRIGGER"
 NUM_OF_REQUESTS_TO_SLEEP_AFTER = 2
 
 
@@ -21,12 +23,11 @@ def setup_logging():
     Setups logging for the ballot.
     :return: None
     """
-    logging_file = "ballot.log"
     logging_format = (
         "%(asctime)s %(levelname)9s %(lineno)4s %(module)s: %(message)s"
     )
     logging.basicConfig(
-        level=logging.INFO, format=logging_format, filename=logging_file
+        level=logging.INFO, format=logging_format
     )
 
 
@@ -167,6 +168,15 @@ def run_ballot(meetup_acess_token, meetup_urlname):
     return len(attending_members)
 
 
+def is_script_ran_from_cron_or_manually_triggered():
+    try:
+        cron_event = get_environment_variable(TRAVIS_EVENT_TYPE)
+        manual_trigger = get_environment_variable(MANUAL_BALLOT_TRIGGER)
+        return cron_event or manual_trigger
+    except KeyError:
+        return False
+
+
 def main():
     """
     Main function which will be executed when this scripted is invoked
@@ -176,6 +186,9 @@ def main():
     """
     setup_logging()
     meetup_access_token = get_environment_variable(MEETUP_ACCESS_TOKEN_VAR)
+    if not is_script_ran_from_cron_or_manually_triggered():
+        logging.info('Script is neither ran from cron nor manually triggered')
+        return
     meetup_urlname = get_environment_variable(MEETUP_URLNAME_VAR)
     rsvp_before_days = int(get_environment_variable(RSVP_BEFORE_DAYS))
     if check_meetup_is_in_less_than_delta_time(
