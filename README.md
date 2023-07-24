@@ -52,7 +52,7 @@ environment variable is set to True.
 * Running Tests
 
 ```bash
-$ nosetests
+$ pytest
 ```
 
 ## Contributing
