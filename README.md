@@ -1,6 +1,6 @@
 # Pydata London Meetup Ballot
 
-[![Build Status](https://travis-ci.org/PyDataLondon/meetup_ballot.svg?branch=master)](https://travis-ci.org/PyDataLondon/meetup_ballot) [![Coverage](https://codecov.io/gh/PyDataLondon/meetup_ballot/branch/master/graph/badge.svg)](https://codecov.io/gh/PyDataLondon/meetup_ballot/branch/master)
+[![Test](https://github.com/PyDataLondon/meetup_ballot/actions/workflows/test.yml/badge.svg)](https://github.com/PyDataLondon/meetup_ballot/actions/workflows/test.yml) [![Coverage](https://codecov.io/gh/PyDataLondon/meetup_ballot/branch/master/graph/badge.svg)](https://codecov.io/gh/PyDataLondon/meetup_ballot/branch/master)
 
 > Used to select members for the next meetup. 
 

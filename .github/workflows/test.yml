@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -27,4 +27,4 @@ jobs:
         pip install pytest
     - name: Test with pytest
       run: |
-        pytest
+        pytest -vvv
